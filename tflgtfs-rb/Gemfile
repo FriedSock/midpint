@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+ruby '3.2.2'
+
+gem 'faraday'
+gem 'faraday-retry'
+gem 'faraday-http-cache'
+gem 'concurrent-ruby-edge'
+gem 'activesupport'
+gem 'pry'
