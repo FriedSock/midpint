@@ -10,17 +10,15 @@ RUN ln -s otp-$OTP_VERSION-shaded.jar /usr/local/share/java/otp.jar
 
 COPY otp /usr/local/bin/
 
-RUN mkdir /graphs
-RUN mkdir /graphs/current
-COPY london.osm.pbf /graphs/current/london.pbf
-COPY gtfs/gtfs.zip /graphs/current/gtfs.zip
-
-COPY otp-config.json /graphs/current/otp-config.json
-
-ENV JAVA_OPTIONS=-Xmx13G
-RUN otp --build /graphs/current
 RUN mkdir /var/otp
 RUN mkdir /var/otp/graphs
-RUN mv /graphs/current /var/otp/graphs/london
+RUN mkdir /var/otp/graphs/london
+
+COPY vendor/london.osm.pbf /var/otp/graphs/london/london.pbf
+COPY vendor/gtfs.zip /var/otp/graphs/london/gtfs.zip
+COPY build-config.json /var/otp/graphs/london/build-config.json
+
+ENV JAVA_OPTIONS=-Xmx13G
+RUN otp --build /var/otp/graphs/london
 
 CMD ["otp", "--router", "london", "--server"]

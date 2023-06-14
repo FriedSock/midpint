@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+set -x
+
+mkdir -p tflgtfs-rb/gtfs
+mkdir -p tflgtfs-rb/cache
+
+cd tflgtfs-rb
+bundle exec ruby better.rb
+cd gtfs
+zip -r gtfs.zip .
+mv gtfs.zip ../../otp/vendor/gtfs.zip
+

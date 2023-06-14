@@ -1,5 +1,6 @@
 TFL_API_KEY = ENV["TFL_API_KEY"]
 GTFS_PATH = "./gtfs"
+CACHE_PATH = "./cache"
 
 require 'active_support'
 require 'concurrent-edge'
@@ -99,6 +100,7 @@ KnownJourney = Struct.new(
   'KnownJourney',
   :hour,
   :minute,
+  :interval_id,
 )
 
 Trip = Struct.new(
@@ -164,7 +166,7 @@ def get_lines
   throttle = Concurrent::Throttle.new 3
 
   conn.get("/line/route").body.map do |l|
-    if l['modeName'] == 'national-rail'
+    if l['modeName'] != 'tube'
       next
     end
 
@@ -214,9 +216,11 @@ def get_timetable(line_id, originator, destination)
   end
 
   timetable_response["timetable"]["routes"].map do |t|
-    station_intervals = t["stationIntervals"].flat_map do |si|
-      si["intervals"].map do |i|
-        StationInterval.new(stop_id: i["stopId"], time_to_arrival: i["timeToArrival"])
+    station_intervals = {}.tap do |station_intervals|
+      t["stationIntervals"].each do |station_interval_set|
+        station_intervals[station_interval_set["id"]] = station_interval_set["intervals"].map do |i|
+          StationInterval.new(stop_id: i["stopId"], time_to_arrival: i["timeToArrival"])
+        end
       end
     end
 
@@ -225,6 +229,7 @@ def get_timetable(line_id, originator, destination)
         KnownJourney.new(
           hour: kj["hour"].to_i,
           minute: kj["minute"].to_i,
+          interval_id: kj["intervalId"],
         )
       end
       Schedule.new(
@@ -366,7 +371,8 @@ def write_stop_times(lines)
               stop_seq = 1
               trip_start_time = format_time(kj)
               csv << [trip_id, route_section.originator, stop_seq, trip_start_time, trip_start_time]
-              timetable.station_intervals.each do |si|
+              intervals = timetable.station_intervals[kj.interval_id.to_s]
+              intervals.each do |si|
                 stop_seq += 1
                 arrival_time = format_time(kj, offset: si.time_to_arrival)
                 csv << [trip_id, si.stop_id, stop_seq, arrival_time, arrival_time]
@@ -419,3 +425,5 @@ def get_trip_id(line_id, route_section, schedule, known_journey)
 end
 
 run
+
+puts cunt_services.to_a
