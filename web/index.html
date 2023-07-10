@@ -9,7 +9,7 @@
      crossorigin=""></script>
     <style>
       #map {
-        height: 1000px;
+        height: 100vh;
       }
     </style>
 
@@ -19,7 +19,7 @@
       function doSomething () {
         var map = L.map('map').setView([51.505, -0.09], 13);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
@@ -31,3 +31,7 @@
      <div id="map"></div>
   </body>
 </html>
+
+osmconvert england.pbf -b=10.5,49,11.5,50 -o=nuernberg.o5m
+osmconvert engl-b=-
+osmconvert ~/Downloads/england-latest.osm.pbf -b=0.6811775268611484,51.2269653316323,0.3906305190768933,51.757834545868775 -o=london_big.osm.pbf
